@@ -32,4 +32,16 @@ progressBar.addEventListener("input", () => {
   const seekTime = (progressBar.value / 100) * video.duration;
   video.currentTime = seekTime;
 });
+const backwardBtn = document.getElementById("backwardBtn");
+const forwardBtn = document.getElementById("forwardBtn");
+
+// SKIP BACKWARD 10s
+backwardBtn.addEventListener("click", () => {
+  video.currentTime = Math.max(0, video.currentTime - 10);
+});
+
+// SKIP FORWARD 10s
+forwardBtn.addEventListener("click", () => {
+  video.currentTime = Math.min(video.duration, video.currentTime + 10);
+});
 
