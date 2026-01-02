@@ -131,3 +131,29 @@ gestureArea.addEventListener("click", (e) => {
   lastTapTime = now;
 });
 
+// ================== PLAN UI LOGIC ==================
+const planButtons = document.querySelectorAll(".plan-btn");
+const currentPlanText = document.getElementById("currentPlanText");
+
+// Show current plan on load
+currentPlanText.textContent = userPlan;
+
+// Highlight active plan
+planButtons.forEach(btn => {
+  if (btn.dataset.plan === userPlan) {
+    btn.classList.add("active");
+  }
+
+  btn.addEventListener("click", () => {
+    const selectedPlan = btn.dataset.plan;
+
+    // Save plan
+    localStorage.setItem("plan", selectedPlan);
+
+    alert(`Plan changed to ${selectedPlan}. Page will reload.`);
+
+    // Reload to apply new limits
+    location.reload();
+  });
+});
+
