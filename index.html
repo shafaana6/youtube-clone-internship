@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Video Platform</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <h1 class="logo">YouTube Clone</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="profile.html">Profile</a>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+
+    <!-- VIDEO PLAYER -->
+    <section class="video-section">
+      <div class="video-wrapper">
+
+            <video id="videoPlayer">
+                <source src="assets/sample.mp4" type="video/mp4">
+                Your browser does not support video.
+            </video>
+
+            <!-- CUSTOM CONTROLS -->
+            <div class="controls">
+                <button id="playPauseBtn">▶️</button>
+                <input type="range" id="progressBar" value="0">
+                <span id="timeDisplay">0:00</span>
+            </div>
+
+            </div>
+
+
+      <h2 class="video-title">One Minute of Pure Puppy Happiness 🐾</h2>
+      <p class="video-desc">
+      Take a short break and enjoy this adorable one-minute video of a playful
+       puppy spreading joy with every move. Perfect for relaxing, smiling, 
+       and testing video playback features on our platform.
+      </p>
+    </section>
+
+    <!-- COMMENTS PLACEHOLDER -->
+    <section class="comments-section">
+      <h3>Comments</h3>
+      <p class="muted">Comment system will be added later.</p>
+    </section>
+
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
