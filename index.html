@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Video Platform</title>
+  <title>MyTube</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <!-- NAVBAR -->
   <header class="navbar">
-    <h1 class="logo">YouTube Clone</h1>
+    <h1 class="logo">MyTube</h1>
     <nav>
       <a href="index.html">Home</a>
       <a href="profile.html">Profile</a>
@@ -20,39 +20,47 @@
   <!-- MAIN CONTENT -->
   <main class="container">
 
-    <!-- VIDEO PLAYER -->
+    <!-- VIDEO SECTION -->
     <section class="video-section">
-      <div class="video-wrapper">
 
-            <video id="videoPlayer">
-                <source src="assets/sample.mp4" type="video/mp4">
-                Your browser does not support video.
-            </video>
+      <div class="gesture-area" id="gestureArea">
+        <video id="videoPlayer">
+          <source src="assets/sample.mp4" type="video/mp4">
+          Your browser does not support video.
+        </video>
+      </div>
 
-            <!-- CUSTOM CONTROLS -->
-           <div class="controls">
-                <button id="backwardBtn">⏪ 10s</button>
-                <button id="playPauseBtn">▶️</button>
-                <button id="forwardBtn">10s ⏩</button>
+      <!-- CONTROLS -->
+      <div class="controls">
+        <button id="backwardBtn">⏪ 10s</button>
+        <button id="playPauseBtn">▶️</button>
+        <button id="forwardBtn">10s ⏩</button>
 
-                <input type="range" id="progressBar" value="0">
-                <span id="timeDisplay">0:00</span>
-            </div>
-        </div>
-
+        <input type="range" id="progressBar" value="0">
+        <span id="timeDisplay">0:00</span>
+      </div>
 
       <h2 class="video-title">One Minute of Pure Puppy Happiness 🐾</h2>
       <p class="video-desc">
-      Take a short break and enjoy this adorable one-minute video of a playful
-       puppy spreading joy with every move. Perfect for relaxing, smiling, 
-       and testing video playback features on our platform.
+        Take a short break and enjoy this adorable one-minute video of a playful puppy spreading joy with every move.
+        Perfect for relaxing, smiling, and testing video playback features on our platform.
       </p>
+
     </section>
 
-    <!-- COMMENTS PLACEHOLDER -->
+    <!-- COMMENTS -->
     <section class="comments-section">
       <h3>Comments</h3>
       <p class="muted">Comment system will be added later.</p>
+    </section>
+
+    <!-- UP NEXT -->
+    <section class="up-next">
+      <h3>Up Next</h3>
+
+      <div class="next-video">🐶 Cute Puppy Playing</div>
+      <div class="next-video">🐕 Dog Running in Garden</div>
+      <div class="next-video">🐾 Sleeping Puppy Compilation</div>
     </section>
 
   </main>
