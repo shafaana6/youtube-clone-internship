@@ -1,11 +1,32 @@
+// ================== ELEMENTS ==================
 const video = document.getElementById("videoPlayer");
 const playPauseBtn = document.getElementById("playPauseBtn");
 const progressBar = document.getElementById("progressBar");
 const timeDisplay = document.getElementById("timeDisplay");
+const backwardBtn = document.getElementById("backwardBtn");
+const forwardBtn = document.getElementById("forwardBtn");
+const gestureArea = document.getElementById("gestureArea");
 
-// PLAY / PAUSE
+// ================== PLAN & WATCH LIMIT ==================
+const userPlan = localStorage.getItem("plan") || "FREE";
+
+const planLimits = {
+  FREE: 30,        // demo: 30 seconds
+  BRONZE: 420,     // 7 minutes
+  SILVER: 600,     // 10 minutes
+  GOLD: Infinity
+};
+
+const maxWatchTime = planLimits[userPlan];
+
+// ================== PLAY / PAUSE ==================
 playPauseBtn.addEventListener("click", () => {
   if (video.paused) {
+    // prevent replay beyond limit
+    if (userPlan !== "GOLD" && video.currentTime >= maxWatchTime) {
+      alert("Watch limit reached. Upgrade to continue watching.");
+      return;
+    }
     video.play();
     playPauseBtn.textContent = "⏸️";
   } else {
@@ -14,61 +35,91 @@ playPauseBtn.addEventListener("click", () => {
   }
 });
 
-// UPDATE PROGRESS BAR
+// ================== TIME UPDATE + HARD LIMIT ==================
 video.addEventListener("timeupdate", () => {
+  // progress bar
   const progress = (video.currentTime / video.duration) * 100;
-  progressBar.value = progress;
+  progressBar.value = progress || 0;
 
+  // time text
   const minutes = Math.floor(video.currentTime / 60);
   const seconds = Math.floor(video.currentTime % 60)
     .toString()
     .padStart(2, "0");
-
   timeDisplay.textContent = `${minutes}:${seconds}`;
+
+  // HARD STOP
+  if (userPlan !== "GOLD" && video.currentTime >= maxWatchTime) {
+    video.currentTime = maxWatchTime;
+    video.pause();
+    playPauseBtn.textContent = "▶️";
+    alert("Watch limit reached. Upgrade to continue watching.");
+  }
 });
 
-// SEEK VIDEO
+// ================== SEEK (BLOCK OVER LIMIT) ==================
 progressBar.addEventListener("input", () => {
   const seekTime = (progressBar.value / 100) * video.duration;
-  video.currentTime = seekTime;
-});
-const backwardBtn = document.getElementById("backwardBtn");
-const forwardBtn = document.getElementById("forwardBtn");
 
-// SKIP BACKWARD 10s
+  if (userPlan !== "GOLD" && seekTime > maxWatchTime) {
+    video.currentTime = maxWatchTime;
+    video.pause();
+    alert("Watch limit reached. Upgrade to continue watching.");
+  } else {
+    video.currentTime = seekTime;
+  }
+});
+
+// ================== SKIP BUTTONS ==================
 backwardBtn.addEventListener("click", () => {
   video.currentTime = Math.max(0, video.currentTime - 10);
 });
 
-// SKIP FORWARD 10s
 forwardBtn.addEventListener("click", () => {
-  video.currentTime = Math.min(video.duration, video.currentTime + 10);
+  const nextTime = video.currentTime + 10;
+
+  if (userPlan !== "GOLD" && nextTime > maxWatchTime) {
+    video.currentTime = maxWatchTime;
+    video.pause();
+    alert("Watch limit reached. Upgrade to continue watching.");
+  } else {
+    video.currentTime = Math.min(video.duration, nextTime);
+  }
 });
 
-const gestureArea = document.getElementById("gestureArea");
+// ================== GESTURE CONTROLS ==================
 let lastTapTime = 0;
 
 gestureArea.addEventListener("click", (e) => {
-  // ❌ Ignore clicks coming from controls
   if (e.target.closest(".controls")) return;
 
-  const currentTime = new Date().getTime();
-  const tapLength = currentTime - lastTapTime;
-
-  const areaWidth = gestureArea.offsetWidth;
+  const now = Date.now();
+  const diff = now - lastTapTime;
+  const width = gestureArea.offsetWidth;
   const tapX = e.offsetX;
 
   // DOUBLE TAP
-  if (tapLength < 300 && tapLength > 0) {
-    if (tapX < areaWidth / 2) {
+  if (diff < 300 && diff > 0) {
+    if (tapX < width / 2) {
       video.currentTime = Math.max(0, video.currentTime - 10);
     } else {
-      video.currentTime = Math.min(video.duration, video.currentTime + 10);
+      const nextTime = video.currentTime + 10;
+      if (userPlan !== "GOLD" && nextTime > maxWatchTime) {
+        video.currentTime = maxWatchTime;
+        video.pause();
+        alert("Watch limit reached. Upgrade to continue watching.");
+      } else {
+        video.currentTime = Math.min(video.duration, nextTime);
+      }
     }
   }
   // SINGLE TAP
   else {
     if (video.paused) {
+      if (userPlan !== "GOLD" && video.currentTime >= maxWatchTime) {
+        alert("Watch limit reached. Upgrade to continue watching.");
+        return;
+      }
       video.play();
       playPauseBtn.textContent = "⏸️";
     } else {
@@ -77,5 +128,6 @@ gestureArea.addEventListener("click", (e) => {
     }
   }
 
-  lastTapTime = currentTime;
+  lastTapTime = now;
 });
+
