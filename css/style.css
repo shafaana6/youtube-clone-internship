@@ -6,7 +6,7 @@
 }
 
 body {
-  background-color: #000;
+  background: #000;
   color: #fff;
 }
 
@@ -16,7 +16,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background-color: #111;
+  background: #111;
 }
 
 .logo {
@@ -24,7 +24,7 @@ body {
 }
 
 .navbar a {
-  color: white;
+  color: #fff;
   text-decoration: none;
   margin-left: 15px;
   font-size: 14px;
@@ -45,19 +45,19 @@ body {
 
 /* PLAN BOX */
 .plan-box {
-  background-color: #1e1e1e;
-  padding: 10px;
-  border-radius: 8px;
+  background: #1e1e1e;
+  padding: 12px;
+  border-radius: 10px;
   margin-bottom: 10px;
 }
 
 .plan-box button {
-  margin-top: 5px;
-  padding: 6px 10px;
-  background-color: red;
+  margin-top: 6px;
+  padding: 7px 12px;
+  background: red;
   border: none;
   color: white;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
@@ -74,18 +74,18 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #1e1e1e;
+  background: #1e1e1e;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-top: 8px;
 }
 
 .controls button {
-  background-color: #333;
+  background: #333;
   border: none;
-  color: white;
+  color: #fff;
   padding: 6px 10px;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
@@ -100,7 +100,7 @@ body {
 
 /* TEXT */
 .video-title {
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: 18px;
 }
 
@@ -113,91 +113,189 @@ body {
 /* PLANS */
 .plans-section {
   margin-top: 25px;
-  background-color: #1e1e1e;
+  background: #1e1e1e;
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .plans {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 
 .plan-btn {
-  background-color: #333;
+  background: #2a2a2a;
   border: none;
   color: white;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 14px;
+  border-radius: 10px;
   cursor: pointer;
-}
-
-.plan-btn small {
-  color: #ccc;
-}
-
-.current-plan {
-  margin-top: 10px;
   font-size: 14px;
 }
 
-/* COMMENTS */
-.comments-section {
-  background-color: #1e1e1e;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 20px;
+.plan-btn:hover {
+  background: #3a3a3a;
 }
 
+.plan-btn small {
+  color: #bbb;
+}
+
+.current-plan {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+/* COMMENTS SECTION */
+.comments-section {
+  background: #1e1e1e;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 25px;
+}
+
+.comments-section h3 {
+  margin-bottom: 12px;
+}
+
+/* COMMENT INPUT */
 #commentInput {
   width: 100%;
   padding: 10px;
-  background-color: #111;
+  background: #111;
   border: none;
   color: #fff;
-  border-radius: 6px;
+  border-radius: 8px;
+  font-size: 14px;
 }
 
 #addCommentBtn {
   margin-top: 8px;
-  padding: 8px 14px;
-  background-color: red;
+  padding: 8px 16px;
+  background: red;
   border: none;
   color: white;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 14px;
 }
 
+/* COMMENT CARD */
 #commentsList {
   margin-top: 15px;
 }
 
-#commentsList div {
-  background-color: #111;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+#commentsList > div {
+  background: #111;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+/* USER ROW */
+.comment-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #bbb;
+  margin-bottom: 6px;
+}
+
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* COMMENT TEXT */
+.comment-text {
+  font-size: 14px;
+  color: #f1f1f1;
+  margin-bottom: 8px;
+}
+
+/* ACTIONS */
+.comment-actions {
+  display: flex;
+  gap: 14px;
+}
+
+.comment-actions button {
+  background: transparent;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.comment-actions button:hover {
+  color: #fff;
 }
 
 /* UP NEXT */
 .up-next {
-  margin-top: 20px;
+  margin-top: 25px;
 }
 
 .next-video {
-  background-color: #1e1e1e;
+  background: #1e1e1e;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 10px;
 }
 
-/* RESPONSIVE */
+/* MOBILE */
 @media (max-width: 480px) {
-  .container {
-    padding: 5px;
-  }
   .plans {
     grid-template-columns: 1fr;
   }
+}
+
+/* ---------- LOGIN UI ---------- */
+
+.login-box {
+  background: #1e1e1e;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+#loginStatus {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 8px;
+}
+
+#usernameInput {
+  width: 100%;
+  padding: 8px;
+  background: #111;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+#loginBtn,
+#logoutBtn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#loginBtn {
+  background: red;
+  color: white;
+}
+
+#logoutBtn {
+  background: #444;
+  color: white;
 }

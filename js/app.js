@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ELEMENTS
+  /* ---------- ELEMENTS ---------- */
   const video = document.getElementById("videoPlayer");
   const playPauseBtn = document.getElementById("playPauseBtn");
   const backwardBtn = document.getElementById("backwardBtn");
@@ -18,7 +18,61 @@ document.addEventListener("DOMContentLoaded", () => {
   const addCommentBtn = document.getElementById("addCommentBtn");
   const commentsList = document.getElementById("commentsList");
 
-  // PLAN SETUP
+  const usernameInput = document.getElementById("usernameInput");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const loginStatus = document.getElementById("loginStatus");
+
+
+  /* ---------- CITY DETECTION ---------- */
+  let userCity = "Unknown";
+
+  fetch("https://ipapi.co/json/")
+    .then(res => res.json())
+    .then(data => {
+      userCity = data.city || "Unknown";
+    })
+    .catch(() => {
+      userCity = "Unknown";
+    });
+
+    let currentUser = localStorage.getItem("user");
+
+function updateLoginUI() {
+  if (currentUser) {
+    loginStatus.textContent = `Logged in as ${currentUser}`;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+    usernameInput.style.display = "none";
+    addCommentBtn.disabled = false;
+  } else {
+    loginStatus.textContent = "Not logged in";
+    loginBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
+    usernameInput.style.display = "block";
+    addCommentBtn.disabled = true;
+  }
+}
+
+updateLoginUI();
+
+loginBtn.onclick = () => {
+  const name = usernameInput.value.trim();
+  if (!name) return;
+
+  currentUser = name;
+  localStorage.setItem("user", name);
+  updateLoginUI();
+};
+
+logoutBtn.onclick = () => {
+  currentUser = null;
+  localStorage.removeItem("user");
+  updateLoginUI();
+};
+
+
+  /* ---------- PLAN SETUP ---------- */
   let userPlan = localStorage.getItem("plan") || "FREE";
   localStorage.setItem("plan", userPlan);
   currentPlanTop.textContent = userPlan;
@@ -31,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     GOLD: Infinity
   };
 
-  // VIDEO CONTROLS
+  /* ---------- VIDEO CONTROLS ---------- */
   playPauseBtn.onclick = () => {
     if (video.paused) {
       video.play();
@@ -42,8 +96,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  backwardBtn.onclick = () => video.currentTime -= 10;
-  forwardBtn.onclick = () => video.currentTime += 10;
+  backwardBtn.onclick = () => {
+    video.currentTime = Math.max(0, video.currentTime - 10);
+  };
+
+  forwardBtn.onclick = () => {
+    video.currentTime = Math.min(video.duration, video.currentTime + 10);
+  };
 
   video.ontimeupdate = () => {
     if (!video.duration) return;
@@ -84,22 +143,45 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   });
 
-  // COMMENTS
+  /* ---------- COMMENTS ---------- */
   let comments = JSON.parse(localStorage.getItem("comments")) || [];
 
   function saveComments() {
     localStorage.setItem("comments", JSON.stringify(comments));
   }
 
+  function timeAgo(timestamp) {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+
+    if (seconds < 60) return "just now";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hr ago`;
+
+    return `${Math.floor(seconds / 86400)} days ago`;
+  }
+
   function renderComments() {
     commentsList.innerHTML = "";
+
     comments.forEach((c, i) => {
       const div = document.createElement("div");
+
       div.innerHTML = `
-        <p>${c.text}</p>
-        <button onclick="like(${i})">👍 ${c.likes}</button>
-        <button onclick="dislike(${i})">👎 ${c.dislikes}</button>
+        <div class="comment-user">
+          <div class="comment-avatar">👤</div>
+          <span>
+           ${c.user || "Guest"} • ${c.city || "Unknown"} • ${c.time ? timeAgo(c.time) : "just now"}
+          </span>
+        </div>
+
+        <p class="comment-text">${c.text}</p>
+
+        <div class="comment-actions">
+          <button onclick="like(${i})">👍 ${c.likes}</button>
+          <button onclick="dislike(${i})">👎 ${c.dislikes}</button>
+        </div>
       `;
+
       commentsList.appendChild(div);
     });
   }
@@ -120,7 +202,17 @@ document.addEventListener("DOMContentLoaded", () => {
   addCommentBtn.onclick = () => {
     const text = commentInput.value.trim();
     if (!text || /[^a-zA-Z0-9\s]/.test(text)) return;
-    comments.push({ text, likes: 0, dislikes: 0 });
+
+    comments.push({
+        text,
+        likes: 0,
+        dislikes: 0,
+        city: userCity,
+        time: Date.now(),
+        user: currentUser
+      });
+
+
     saveComments();
     renderComments();
     commentInput.value = "";
