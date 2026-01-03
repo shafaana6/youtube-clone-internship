@@ -299,3 +299,30 @@ body {
   background: #444;
   color: white;
 }
+.comment-actions button:last-child {
+  color: #4da6ff;
+}
+
+.comment-actions button:last-child:hover {
+  color: #ffffff;
+}
+/* ---------- GESTURE TAP ZONES ---------- */
+.gesture-area {
+  position: relative;
+}
+
+.tap-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 5;
+}
+
+.tap-zone.left { left: 0; width: 33.33%; }
+.tap-zone.center { left: 33.33%; width: 33.33%; }
+.tap-zone.right { right: 0; width: 33.33%; }
+
+/* (Optional) Debug visual — remove later */
+/*
+.tap-zone { background: rgba(255,255,255,0.03); }
+*/

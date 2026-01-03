@@ -23,54 +23,48 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logoutBtn");
   const loginStatus = document.getElementById("loginStatus");
 
-
   /* ---------- CITY DETECTION ---------- */
   let userCity = "Unknown";
 
   fetch("https://ipapi.co/json/")
     .then(res => res.json())
-    .then(data => {
-      userCity = data.city || "Unknown";
-    })
-    .catch(() => {
-      userCity = "Unknown";
-    });
+    .then(data => userCity = data.city || "Unknown")
+    .catch(() => userCity = "Unknown");
 
-    let currentUser = localStorage.getItem("user");
+  /* ---------- LOGIN ---------- */
+  let currentUser = localStorage.getItem("user");
 
-function updateLoginUI() {
-  if (currentUser) {
-    loginStatus.textContent = `Logged in as ${currentUser}`;
-    loginBtn.style.display = "none";
-    logoutBtn.style.display = "inline-block";
-    usernameInput.style.display = "none";
-    addCommentBtn.disabled = false;
-  } else {
-    loginStatus.textContent = "Not logged in";
-    loginBtn.style.display = "inline-block";
-    logoutBtn.style.display = "none";
-    usernameInput.style.display = "block";
-    addCommentBtn.disabled = true;
+  function updateLoginUI() {
+    if (currentUser) {
+      loginStatus.textContent = `Logged in as ${currentUser}`;
+      loginBtn.style.display = "none";
+      logoutBtn.style.display = "inline-block";
+      usernameInput.style.display = "none";
+      addCommentBtn.disabled = false;
+    } else {
+      loginStatus.textContent = "Not logged in";
+      loginBtn.style.display = "inline-block";
+      logoutBtn.style.display = "none";
+      usernameInput.style.display = "block";
+      addCommentBtn.disabled = true;
+    }
   }
-}
 
-updateLoginUI();
-
-loginBtn.onclick = () => {
-  const name = usernameInput.value.trim();
-  if (!name) return;
-
-  currentUser = name;
-  localStorage.setItem("user", name);
   updateLoginUI();
-};
 
-logoutBtn.onclick = () => {
-  currentUser = null;
-  localStorage.removeItem("user");
-  updateLoginUI();
-};
+  loginBtn.onclick = () => {
+    const name = usernameInput.value.trim();
+    if (!name) return;
+    currentUser = name;
+    localStorage.setItem("user", name);
+    updateLoginUI();
+  };
 
+  logoutBtn.onclick = () => {
+    currentUser = null;
+    localStorage.removeItem("user");
+    updateLoginUI();
+  };
 
   /* ---------- PLAN SETUP ---------- */
   let userPlan = localStorage.getItem("plan") || "FREE";
@@ -152,12 +146,40 @@ logoutBtn.onclick = () => {
 
   function timeAgo(timestamp) {
     const seconds = Math.floor((Date.now() - timestamp) / 1000);
-
     if (seconds < 60) return "just now";
     if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)} hr ago`;
-
     return `${Math.floor(seconds / 86400)} days ago`;
+  }
+
+  async function translateComment(index) {
+    const translatedEl = document.getElementById(`translated-${index}`);
+    if (!translatedEl) return;
+
+    if (translatedEl.style.display === "block") {
+      translatedEl.style.display = "none";
+      return;
+    }
+
+    try {
+      const res = await fetch("https://libretranslate.de/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          q: comments[index].text,
+          source: "auto",
+          target: "en",
+          format: "text"
+        })
+      });
+
+      const data = await res.json();
+      translatedEl.textContent = "→ " + data.translatedText;
+      translatedEl.style.display = "block";
+    } catch {
+      translatedEl.textContent = "Translation failed";
+      translatedEl.style.display = "block";
+    }
   }
 
   function renderComments() {
@@ -165,12 +187,11 @@ logoutBtn.onclick = () => {
 
     comments.forEach((c, i) => {
       const div = document.createElement("div");
-
       div.innerHTML = `
         <div class="comment-user">
           <div class="comment-avatar">👤</div>
           <span>
-           ${c.user || "Guest"} • ${c.city || "Unknown"} • ${c.time ? timeAgo(c.time) : "just now"}
+            ${c.user || "Guest"} • ${c.city || "Unknown"} • ${c.time ? timeAgo(c.time) : "just now"}
           </span>
         </div>
 
@@ -179,9 +200,11 @@ logoutBtn.onclick = () => {
         <div class="comment-actions">
           <button onclick="like(${i})">👍 ${c.likes}</button>
           <button onclick="dislike(${i})">👎 ${c.dislikes}</button>
+          <button onclick="translateComment(${i})">🌐 Translate</button>
         </div>
-      `;
 
+        <p class="comment-text" id="translated-${i}" style="display:none; opacity:0.8;"></p>
+      `;
       commentsList.appendChild(div);
     });
   }
@@ -204,19 +227,60 @@ logoutBtn.onclick = () => {
     if (!text || /[^a-zA-Z0-9\s]/.test(text)) return;
 
     comments.push({
-        text,
-        likes: 0,
-        dislikes: 0,
-        city: userCity,
-        time: Date.now(),
-        user: currentUser
-      });
-
+      text,
+      likes: 0,
+      dislikes: 0,
+      city: userCity,
+      time: Date.now(),
+      user: currentUser
+    });
 
     saveComments();
     renderComments();
     commentInput.value = "";
   };
+
+  /* ---------- GESTURE CONTROLS ---------- */
+  const tapLeft = document.getElementById("tapLeft");
+  const tapCenter = document.getElementById("tapCenter");
+  const tapRight = document.getElementById("tapRight");
+
+  function setupGestures(zone, actions) {
+    if (!zone) return;
+
+    let taps = 0;
+    let timer = null;
+
+    const handler = () => {
+      taps++;
+      clearTimeout(timer);
+
+      timer = setTimeout(() => {
+        if (taps === 1 && actions.single) actions.single();
+        if (taps === 2 && actions.double) actions.double();
+        if (taps === 3 && actions.triple) actions.triple();
+        taps = 0;
+      }, 300);
+    };
+
+    zone.addEventListener("click", handler);
+    zone.addEventListener("touchstart", handler);
+  }
+
+  setupGestures(tapLeft, {
+    double: () => video.currentTime = Math.max(0, video.currentTime - 10),
+    triple: () => document.querySelector(".comments-section")?.scrollIntoView({ behavior: "smooth" })
+  });
+
+  setupGestures(tapCenter, {
+    single: () => playPauseBtn.click(),
+    triple: () => alert("Next video (demo)")
+  });
+
+  setupGestures(tapRight, {
+    double: () => video.currentTime = Math.min(video.duration, video.currentTime + 10),
+    triple: () => confirm("Close website?") && window.close()
+  });
 
   renderComments();
 });
