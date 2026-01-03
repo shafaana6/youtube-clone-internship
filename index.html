@@ -30,7 +30,7 @@
         <button id="upgradeBtn">Upgrade to Premium</button>
       </div>
 
-      <!-- VIDEO + GESTURE AREA -->
+      <!-- VIDEO -->
       <div class="gesture-area" id="gestureArea">
         <video id="videoPlayer">
           <source src="assets/sample.mp4" type="video/mp4">
@@ -38,17 +38,20 @@
         </video>
       </div>
 
+      <!-- LOCK MESSAGE -->
+      <p id="lockMessage">
+        Free plan limit reached. Upgrade to continue watching.
+      </p>
+
       <!-- CONTROLS -->
       <div class="controls">
         <button id="backwardBtn">⏪ 10s</button>
         <button id="playPauseBtn">▶️</button>
         <button id="forwardBtn">10s ⏩</button>
-
         <input type="range" id="progressBar" value="0">
-        <span id="timeDisplay">0:00</span>
+        <span id="timeDisplay">0s / 0s</span>
       </div>
 
-      <!-- VIDEO DETAILS -->
       <h2 class="video-title">One Minute of Pure Puppy Happiness 🐾</h2>
       <p class="video-desc">
         Take a short break and enjoy this adorable one-minute video of a playful puppy spreading joy with every move.
@@ -65,15 +68,12 @@
         <button class="plan-btn" data-plan="FREE">
           Free<br><small>5 min (demo: 30s)</small>
         </button>
-
         <button class="plan-btn" data-plan="BRONZE">
           Bronze ₹10<br><small>7 min</small>
         </button>
-
         <button class="plan-btn" data-plan="SILVER">
           Silver ₹50<br><small>10 min</small>
         </button>
-
         <button class="plan-btn" data-plan="GOLD">
           Gold ₹100<br><small>Unlimited</small>
         </button>
@@ -87,20 +87,14 @@
     <!-- COMMENTS -->
     <section class="comments-section">
       <h3>Comments</h3>
-      <input
-        type="text"
-        id="commentInput"
-        placeholder="Add a public comment"
-      />
+      <input type="text" id="commentInput" placeholder="Add a public comment">
       <button id="addCommentBtn">Comment</button>
       <div id="commentsList"></div>
     </section>
 
-
     <!-- UP NEXT -->
     <section class="up-next">
       <h3>Up Next</h3>
-
       <div class="next-video">🐶 Cute Puppy Playing</div>
       <div class="next-video">🐕 Dog Running in Garden</div>
       <div class="next-video">🐾 Sleeping Puppy Compilation</div>
@@ -108,8 +102,6 @@
 
   </main>
 
-  <!-- SCRIPT FILE -->
   <script src="js/app.js"></script>
-
 </body>
 </html>
