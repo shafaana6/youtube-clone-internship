@@ -1,14 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* ---------- ELEMENTS ---------- */
+  /* ========= ELEMENTS ========= */
   const video = document.getElementById("videoPlayer");
   const playPauseBtn = document.getElementById("playPauseBtn");
   const backwardBtn = document.getElementById("backwardBtn");
   const forwardBtn = document.getElementById("forwardBtn");
   const progressBar = document.getElementById("progressBar");
   const timeDisplay = document.getElementById("timeDisplay");
+  const controls = document.querySelector(".controls");
 
-  const upgradeBtn = document.getElementById("upgradeBtn");
   const currentPlanTop = document.getElementById("currentPlan");
   const currentPlanBottom = document.getElementById("currentPlanText");
   const planButtons = document.querySelectorAll(".plan-btn");
@@ -23,34 +23,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logoutBtn");
   const loginStatus = document.getElementById("loginStatus");
 
-  /* ---------- CITY DETECTION ---------- */
-  let userCity = "Unknown";
+  const gestureArea = document.getElementById("gestureArea");
 
-  fetch("https://ipapi.co/json/")
-    .then(res => res.json())
-    .then(data => userCity = data.city || "Unknown")
-    .catch(() => userCity = "Unknown");
-
-  /* ---------- LOGIN ---------- */
+  /* ========= LOGIN ========= */
   let currentUser = localStorage.getItem("user");
 
   function updateLoginUI() {
-    if (currentUser) {
-      loginStatus.textContent = `Logged in as ${currentUser}`;
-      loginBtn.style.display = "none";
-      logoutBtn.style.display = "inline-block";
-      usernameInput.style.display = "none";
-      addCommentBtn.disabled = false;
-    } else {
-      loginStatus.textContent = "Not logged in";
-      loginBtn.style.display = "inline-block";
-      logoutBtn.style.display = "none";
-      usernameInput.style.display = "block";
-      addCommentBtn.disabled = true;
-    }
-  }
+    const loggedIn = Boolean(currentUser);
+    loginStatus.textContent = loggedIn
+      ? `Logged in as ${currentUser}`
+      : "Not logged in";
 
-  updateLoginUI();
+    loginBtn.style.display = loggedIn ? "none" : "inline-block";
+    logoutBtn.style.display = loggedIn ? "inline-block" : "none";
+    usernameInput.style.display = loggedIn ? "none" : "block";
+    addCommentBtn.disabled = !loggedIn;
+    commentInput.disabled = !loggedIn;
+  }
 
   loginBtn.onclick = () => {
     const name = usernameInput.value.trim();
@@ -66,12 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updateLoginUI();
   };
 
-  /* ---------- PLAN SETUP ---------- */
-  let userPlan = localStorage.getItem("plan") || "FREE";
-  localStorage.setItem("plan", userPlan);
-  currentPlanTop.textContent = userPlan;
-  currentPlanBottom.textContent = userPlan;
+  updateLoginUI();
 
+  /* ========= PLAN ========= */
   const PLAN_LIMITS = {
     FREE: 30,
     BRONZE: 420,
@@ -79,208 +65,197 @@ document.addEventListener("DOMContentLoaded", () => {
     GOLD: Infinity
   };
 
-  /* ---------- VIDEO CONTROLS ---------- */
-  playPauseBtn.onclick = () => {
-    if (video.paused) {
-      video.play();
-      playPauseBtn.textContent = "⏸️";
-    } else {
-      video.pause();
-      playPauseBtn.textContent = "▶️";
-    }
-  };
+  let userPlan = localStorage.getItem("plan") || "FREE";
+  localStorage.setItem("plan", userPlan);
 
-  backwardBtn.onclick = () => {
-    video.currentTime = Math.max(0, video.currentTime - 10);
-  };
-
-  forwardBtn.onclick = () => {
-    video.currentTime = Math.min(video.duration, video.currentTime + 10);
-  };
-
-  video.ontimeupdate = () => {
-    if (!video.duration) return;
-
-    progressBar.value = (video.currentTime / video.duration) * 100;
-    timeDisplay.textContent =
-      `${Math.floor(video.currentTime)}s / ${Math.floor(video.duration)}s`;
-
-    if (video.currentTime >= PLAN_LIMITS[userPlan]) {
-      video.pause();
-      lockMessage.style.display = "block";
-    }
-  };
-
-  progressBar.oninput = () => {
-    video.currentTime = (progressBar.value / 100) * video.duration;
-  };
-
-  function unlock() {
+  function updatePlanUI() {
+    currentPlanTop.textContent = userPlan;
+    currentPlanBottom.textContent = userPlan;
     lockMessage.style.display = "none";
+    controls.classList.remove("disabled");
   }
-
-  upgradeBtn.onclick = () => {
-    userPlan = "GOLD";
-    localStorage.setItem("plan", "GOLD");
-    currentPlanTop.textContent = "GOLD";
-    currentPlanBottom.textContent = "GOLD";
-    unlock();
-  };
 
   planButtons.forEach(btn => {
     btn.onclick = () => {
       userPlan = btn.dataset.plan;
       localStorage.setItem("plan", userPlan);
-      currentPlanTop.textContent = userPlan;
-      currentPlanBottom.textContent = userPlan;
-      unlock();
+      updatePlanUI();
     };
   });
 
-  /* ---------- COMMENTS ---------- */
+  updatePlanUI();
+
+  /* ========= VIDEO ========= */
+  playPauseBtn.onclick = () => {
+    video.paused ? video.play() : video.pause();
+  };
+
+  backwardBtn.onclick = () => video.currentTime -= 10;
+  forwardBtn.onclick = () => video.currentTime += 10;
+
+  video.addEventListener("timeupdate", () => {
+    if (!video.duration) return;
+
+    const limit = PLAN_LIMITS[userPlan];
+    if (video.currentTime >= limit) {
+      video.currentTime = limit;
+      video.pause();
+      lockMessage.style.display = "block";
+      controls.classList.add("disabled");
+    }
+
+    progressBar.max = video.duration;
+    progressBar.value = video.currentTime;
+    timeDisplay.textContent =
+      `${Math.floor(video.currentTime)}s / ${Math.floor(video.duration)}s`;
+  });
+
+  progressBar.oninput = () => {
+    video.currentTime = Math.min(progressBar.value, PLAN_LIMITS[userPlan]);
+  };
+
+  /* ========= TRANSLATION DATA ========= */
+  const DICTIONARIES = {
+    English: {},
+    Hindi: {
+      namaste: "hello",
+      shukriya: "thank you",
+      dhanyavaad: "thank you",
+      dost: "friend",
+      pyaar: "love"
+    },
+    Tamil: {
+      vanakkam: "hello",
+      nandri: "thank you",
+      nanri: "thank you",
+      nanban: "friend",
+      kadhal: "love",
+      epdi: "how",
+      enna: "what"
+    },
+    Other: {
+      hola: "hello",
+      bonjour: "hello",
+      amigo: "friend",
+      gracias: "thank you",
+      danke: "thank you",
+      salaam: "peace"
+    }
+  };
+
+  function detectLanguage(word) {
+    for (const lang in DICTIONARIES) {
+      if (DICTIONARIES[lang][word]) {
+        return {
+          language: lang,
+          translation: DICTIONARIES[lang][word]
+        };
+      }
+    }
+    return null;
+  }
+
+  /* ========= COMMENTS ========= */
   let comments = JSON.parse(localStorage.getItem("comments")) || [];
-
-  function saveComments() {
-    localStorage.setItem("comments", JSON.stringify(comments));
-  }
-
-  function timeAgo(timestamp) {
-    const seconds = Math.floor((Date.now() - timestamp) / 1000);
-    if (seconds < 60) return "just now";
-    if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hr ago`;
-    return `${Math.floor(seconds / 86400)} days ago`;
-  }
-
-  async function translateComment(index) {
-    const translatedEl = document.getElementById(`translated-${index}`);
-    if (!translatedEl) return;
-
-    if (translatedEl.style.display === "block") {
-      translatedEl.style.display = "none";
-      return;
-    }
-
-    try {
-      const res = await fetch("https://libretranslate.de/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          q: comments[index].text,
-          source: "auto",
-          target: "en",
-          format: "text"
-        })
-      });
-
-      const data = await res.json();
-      translatedEl.textContent = "→ " + data.translatedText;
-      translatedEl.style.display = "block";
-    } catch {
-      translatedEl.textContent = "Translation failed";
-      translatedEl.style.display = "block";
-    }
-  }
 
   function renderComments() {
     commentsList.innerHTML = "";
 
     comments.forEach((c, i) => {
       const div = document.createElement("div");
-      div.innerHTML = `
-        <div class="comment-user">
-          <div class="comment-avatar">👤</div>
-          <span>
-            ${c.user || "Guest"} • ${c.city || "Unknown"} • ${c.time ? timeAgo(c.time) : "just now"}
-          </span>
-        </div>
+      div.dataset.index = i;
 
+      div.innerHTML = `
+        <p><strong>${c.user}</strong></p>
         <p class="comment-text">${c.text}</p>
 
         <div class="comment-actions">
-          <button onclick="like(${i})">👍 ${c.likes}</button>
-          <button onclick="dislike(${i})">👎 ${c.dislikes}</button>
-          <button onclick="translateComment(${i})">🌐 Translate</button>
+          <button data-action="like">👍 ${c.likes}</button>
+          <button data-action="dislike">👎 ${c.dislikes}</button>
+          <button data-action="translate">
+            ${c.showTranslation ? "❌ Hide" : "🌐 Translate"}
+          </button>
         </div>
 
-        <p class="comment-text" id="translated-${i}" style="display:none; opacity:0.8;"></p>
+        ${
+          c.showTranslation
+            ? `<p class="comment-text translated" style="opacity:0.7;">
+                → ${c.translated} <br>
+                <small>Detected: ${c.language}</small>
+              </p>`
+            : ""
+        }
       `;
+
       commentsList.appendChild(div);
     });
   }
 
-  window.like = i => {
-    comments[i].likes++;
-    saveComments();
-    renderComments();
-  };
+  commentsList.onclick = e => {
+    if (!currentUser) return;
 
-  window.dislike = i => {
-    comments[i].dislikes++;
-    if (comments[i].dislikes >= 2) comments.splice(i, 1);
-    saveComments();
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const card = btn.closest("div[data-index]");
+    const i = Number(card.dataset.index);
+    const action = btn.dataset.action;
+
+    if (action === "like") comments[i].likes++;
+
+    if (action === "dislike") {
+      comments[i].dislikes++;
+      if (comments[i].dislikes >= 2) comments.splice(i, 1);
+    }
+
+    if (action === "translate") {
+      if (comments[i].translated) {
+        comments[i].showTranslation = !comments[i].showTranslation;
+      } else {
+        const key = comments[i].text.toLowerCase();
+        const result = detectLanguage(key);
+
+        comments[i].translated = result
+          ? result.translation
+          : "Translation not available";
+        comments[i].language = result
+          ? result.language
+          : "Unknown";
+        comments[i].showTranslation = true;
+      }
+    }
+
+    localStorage.setItem("comments", JSON.stringify(comments));
     renderComments();
   };
 
   addCommentBtn.onclick = () => {
     const text = commentInput.value.trim();
-    if (!text || /[^a-zA-Z0-9\s]/.test(text)) return;
+    if (!text) return;
 
     comments.push({
+      user: currentUser,
       text,
       likes: 0,
       dislikes: 0,
-      city: userCity,
-      time: Date.now(),
-      user: currentUser
+      translated: null,
+      language: null,
+      showTranslation: false
     });
 
-    saveComments();
+    localStorage.setItem("comments", JSON.stringify(comments));
     renderComments();
     commentInput.value = "";
   };
 
-  /* ---------- GESTURE CONTROLS ---------- */
-  const tapLeft = document.getElementById("tapLeft");
-  const tapCenter = document.getElementById("tapCenter");
-  const tapRight = document.getElementById("tapRight");
-
-  function setupGestures(zone, actions) {
-    if (!zone) return;
-
-    let taps = 0;
-    let timer = null;
-
-    const handler = () => {
-      taps++;
-      clearTimeout(timer);
-
-      timer = setTimeout(() => {
-        if (taps === 1 && actions.single) actions.single();
-        if (taps === 2 && actions.double) actions.double();
-        if (taps === 3 && actions.triple) actions.triple();
-        taps = 0;
-      }, 300);
-    };
-
-    zone.addEventListener("click", handler);
-    zone.addEventListener("touchstart", handler);
-  }
-
-  setupGestures(tapLeft, {
-    double: () => video.currentTime = Math.max(0, video.currentTime - 10),
-    triple: () => document.querySelector(".comments-section")?.scrollIntoView({ behavior: "smooth" })
-  });
-
-  setupGestures(tapCenter, {
-    single: () => playPauseBtn.click(),
-    triple: () => alert("Next video (demo)")
-  });
-
-  setupGestures(tapRight, {
-    double: () => video.currentTime = Math.min(video.duration, video.currentTime + 10),
-    triple: () => confirm("Close website?") && window.close()
-  });
-
   renderComments();
+
+  /* ========= GESTURES ========= */
+  gestureArea.onclick = e => {
+    const w = gestureArea.clientWidth;
+    if (e.offsetX < w / 3) video.currentTime -= 10;
+    else if (e.offsetX > (w * 2) / 3) video.currentTime += 10;
+    else playPauseBtn.click();
+  };
+
 });

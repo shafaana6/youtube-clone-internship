@@ -1,3 +1,4 @@
+/* ========== GLOBAL RESET ========== */
 * {
   margin: 0;
   padding: 0;
@@ -10,7 +11,7 @@ body {
   color: #fff;
 }
 
-/* NAVBAR */
+/* ========== NAVBAR ========== */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -30,20 +31,22 @@ body {
   font-size: 14px;
 }
 
-/* MAIN */
+/* ========== MAIN ========== */
 .container {
   max-width: 900px;
   margin: auto;
   padding: 10px;
 }
 
-/* VIDEO */
+/* ========== VIDEO SECTION ========== */
 .video-section video {
   width: 100%;
   border-radius: 12px;
+  position: relative;
+  z-index: 1;
 }
 
-/* PLAN BOX */
+/* ========== PLAN BOX ========== */
 .plan-box {
   background: #1e1e1e;
   padding: 12px;
@@ -59,9 +62,14 @@ body {
   color: white;
   border-radius: 6px;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
-/* LOCK MESSAGE */
+.plan-box button:hover {
+  background: #cc0000;
+}
+
+/* ========== LOCK MESSAGE ========== */
 #lockMessage {
   display: none;
   color: red;
@@ -69,7 +77,7 @@ body {
   font-size: 14px;
 }
 
-/* CONTROLS */
+/* ========== CONTROLS ========== */
 .controls {
   display: flex;
   align-items: center;
@@ -80,6 +88,11 @@ body {
   margin-top: 8px;
 }
 
+.controls.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .controls button {
   background: #333;
   border: none;
@@ -87,6 +100,15 @@ body {
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.controls button:hover {
+  background: #444;
+}
+
+.controls button:active {
+  transform: scale(0.95);
 }
 
 .controls input {
@@ -98,7 +120,15 @@ body {
   color: #ccc;
 }
 
-/* TEXT */
+/* ========== PROGRESS BAR ========== */
+#progressBar {
+  appearance: none;
+  height: 4px;
+  border-radius: 4px;
+  background: #444;
+}
+
+/* ========== VIDEO TEXT ========== */
 .video-title {
   margin-top: 12px;
   font-size: 18px;
@@ -110,7 +140,7 @@ body {
   margin-bottom: 15px;
 }
 
-/* PLANS */
+/* ========== PLANS ========== */
 .plans-section {
   margin-top: 25px;
   background: #1e1e1e;
@@ -132,10 +162,15 @@ body {
   border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .plan-btn:hover {
   background: #3a3a3a;
+}
+
+.plan-btn:active {
+  transform: scale(0.96);
 }
 
 .plan-btn small {
@@ -147,7 +182,7 @@ body {
   font-size: 14px;
 }
 
-/* COMMENTS SECTION */
+/* ========== COMMENTS ========== */
 .comments-section {
   background: #1e1e1e;
   padding: 16px;
@@ -155,11 +190,6 @@ body {
   margin-top: 25px;
 }
 
-.comments-section h3 {
-  margin-bottom: 12px;
-}
-
-/* COMMENT INPUT */
 #commentInput {
   width: 100%;
   padding: 10px;
@@ -179,6 +209,11 @@ body {
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  transition: background 0.2s;
+}
+
+#addCommentBtn:hover {
+  background: #cc0000;
 }
 
 /* COMMENT CARD */
@@ -191,9 +226,21 @@ body {
   padding: 12px;
   border-radius: 10px;
   margin-bottom: 12px;
+  animation: fadeIn 0.2s ease;
 }
 
-/* USER ROW */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* COMMENT USER */
 .comment-user {
   display: flex;
   align-items: center;
@@ -203,16 +250,6 @@ body {
   margin-bottom: 6px;
 }
 
-.comment-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* COMMENT TEXT */
 .comment-text {
   font-size: 14px;
@@ -220,7 +257,7 @@ body {
   margin-bottom: 8px;
 }
 
-/* ACTIONS */
+/* COMMENT ACTIONS */
 .comment-actions {
   display: flex;
   gap: 14px;
@@ -232,33 +269,18 @@ body {
   color: #aaa;
   cursor: pointer;
   font-size: 14px;
+  transition: color 0.2s;
 }
 
 .comment-actions button:hover {
   color: #fff;
 }
 
-/* UP NEXT */
-.up-next {
-  margin-top: 25px;
+.comment-actions .translate-btn {
+  color: #4da6ff;
 }
 
-.next-video {
-  background: #1e1e1e;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
-
-/* MOBILE */
-@media (max-width: 480px) {
-  .plans {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ---------- LOGIN UI ---------- */
-
+/* ========== LOGIN ========== */
 .login-box {
   background: #1e1e1e;
   padding: 12px;
@@ -282,47 +304,60 @@ body {
   margin-bottom: 8px;
 }
 
-#loginBtn,
-#logoutBtn {
-  padding: 6px 14px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-#loginBtn {
-  background: red;
-  color: white;
-}
-
-#logoutBtn {
-  background: #444;
-  color: white;
-}
-.comment-actions button:last-child {
-  color: #4da6ff;
-}
-
-.comment-actions button:last-child:hover {
-  color: #ffffff;
-}
-/* ---------- GESTURE TAP ZONES ---------- */
+/* ========== GESTURE AREA ========== */
 .gesture-area {
   position: relative;
+  width: 100%;
 }
 
 .tap-zone {
   position: absolute;
   top: 0;
   bottom: 0;
-  z-index: 5;
+  width: 33.33%;
+  z-index: 2;
+  pointer-events: none;
 }
 
-.tap-zone.left { left: 0; width: 33.33%; }
-.tap-zone.center { left: 33.33%; width: 33.33%; }
-.tap-zone.right { right: 0; width: 33.33%; }
+.tap-zone.left {
+  left: 0;
+}
 
-/* (Optional) Debug visual — remove later */
-/*
-.tap-zone { background: rgba(255,255,255,0.03); }
-*/
+.tap-zone.center {
+  left: 33.33%;
+}
+
+.tap-zone.right {
+  right: 0;
+}
+
+/* ========== DOWNLOAD ========== */
+#downloadBtn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #b02626;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+#downloadBtn:hover {
+  background: #27ae60;
+}
+
+#downloadMsg {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #ccc;
+}
+
+/* ========== MOBILE ========== */
+@media (max-width: 480px) {
+  .plans {
+    grid-template-columns: 1fr;
+  }
+}

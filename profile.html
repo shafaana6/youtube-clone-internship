@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile | MyTube</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <h1 class="logo">MyTube</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="profile.html">Profile</a>
+    </nav>
+  </header>
+
+  <!-- PROFILE CONTAINER -->
+  <main class="container">
+
+    <section class="profile-box" style="background:#1e1e1e;padding:16px;border-radius:12px;">
+
+      <h2>👤 User Profile</h2>
+
+      <p id="profileStatus" style="margin-top:8px;color:#ccc;"></p>
+
+      <hr style="margin:12px 0;border-color:#333;" />
+
+      <!-- PLAN INFO -->
+      <h3>📦 Subscription</h3>
+      <p>Current Plan: <strong id="profilePlan">FREE</strong></p>
+      <p style="font-size:13px;color:#aaa;">
+        Video access depends on your current plan.
+      </p>
+
+      <hr style="margin:12px 0;border-color:#333;" />
+
+      <!-- ACTIVITY -->
+      <h3>📊 Activity</h3>
+      <p>Total Comments: <span id="totalComments">0</span></p>
+      <p>Total Likes Given: <span id="totalLikes">0</span></p>
+      <p>Total Dislikes Given: <span id="totalDislikes">0</span></p>
+
+      <hr style="margin:12px 0;border-color:#333;" />
+
+      <!-- ACTIONS -->
+      <button id="logoutProfileBtn" style="margin-top:10px;">Logout</button>
+      <br />
+      <a href="index.html" style="display:inline-block;margin-top:8px;color:#4da6ff;">
+        ← Back to Home
+      </a>
+
+    </section>
+
+  </main>
+
+  <!-- PROFILE SCRIPT -->
+  <script>
+    const user = localStorage.getItem("user");
+    const plan = localStorage.getItem("plan") || "FREE";
+    const comments = JSON.parse(localStorage.getItem("comments")) || [];
+
+    const profileStatus = document.getElementById("profileStatus");
+    const profilePlan = document.getElementById("profilePlan");
+    const totalComments = document.getElementById("totalComments");
+    const totalLikes = document.getElementById("totalLikes");
+    const totalDislikes = document.getElementById("totalDislikes");
+    const logoutBtn = document.getElementById("logoutProfileBtn");
+
+    if (!user) {
+      profileStatus.textContent = "You are not logged in.";
+    } else {
+      profileStatus.textContent = `Logged in as ${user}`;
+    }
+
+    profilePlan.textContent = plan;
+
+    totalComments.textContent = comments.filter(c => c.user === user).length;
+    totalLikes.textContent = comments.reduce((a, c) => a + (c.likes || 0), 0);
+    totalDislikes.textContent = comments.reduce((a, c) => a + (c.dislikes || 0), 0);
+
+    logoutBtn.onclick = () => {
+      localStorage.removeItem("user");
+      window.location.href = "index.html";
+    };
+  </script>
+
+</body>
+</html>
