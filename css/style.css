@@ -182,3 +182,28 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* PLAN BOX (above video) */
+.plan-box {
+  background-color: #1e1e1e;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.plan-box button {
+  margin-top: 5px;
+  padding: 6px 10px;
+  background-color: red;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* GESTURE AREA */
+.gesture-area {
+  position: relative;
+}

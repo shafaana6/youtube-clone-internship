@@ -6,6 +6,7 @@
   <title>MyTube</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
   <!-- NAVBAR -->
@@ -23,6 +24,13 @@
     <!-- VIDEO SECTION -->
     <section class="video-section">
 
+      <!-- PLAN INFO -->
+      <div class="plan-box">
+        <p>Your Plan: <span id="currentPlan">FREE</span></p>
+        <button id="upgradeBtn">Upgrade to Premium</button>
+      </div>
+
+      <!-- VIDEO + GESTURE AREA -->
       <div class="gesture-area" id="gestureArea">
         <video id="videoPlayer">
           <source src="assets/sample.mp4" type="video/mp4">
@@ -40,6 +48,7 @@
         <span id="timeDisplay">0:00</span>
       </div>
 
+      <!-- VIDEO DETAILS -->
       <h2 class="video-title">One Minute of Pure Puppy Happiness 🐾</h2>
       <p class="video-desc">
         Take a short break and enjoy this adorable one-minute video of a playful puppy spreading joy with every move.
@@ -75,12 +84,18 @@
       </p>
     </section>
 
-
     <!-- COMMENTS -->
     <section class="comments-section">
       <h3>Comments</h3>
-      <p class="muted">Comment system will be added later.</p>
+      <input
+        type="text"
+        id="commentInput"
+        placeholder="Add a public comment"
+      />
+      <button id="addCommentBtn">Comment</button>
+      <div id="commentsList"></div>
     </section>
+
 
     <!-- UP NEXT -->
     <section class="up-next">
@@ -93,6 +108,8 @@
 
   </main>
 
+  <!-- SCRIPT FILE -->
   <script src="js/app.js"></script>
+
 </body>
 </html>

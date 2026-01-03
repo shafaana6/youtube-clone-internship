@@ -1,32 +1,37 @@
-// ================== ELEMENTS ==================
+// ================== VIDEO ELEMENTS ==================
 const video = document.getElementById("videoPlayer");
 const playPauseBtn = document.getElementById("playPauseBtn");
-const progressBar = document.getElementById("progressBar");
-const timeDisplay = document.getElementById("timeDisplay");
 const backwardBtn = document.getElementById("backwardBtn");
 const forwardBtn = document.getElementById("forwardBtn");
-const gestureArea = document.getElementById("gestureArea");
+const progressBar = document.getElementById("progressBar");
+const timeDisplay = document.getElementById("timeDisplay");
 
-// ================== PLAN & WATCH LIMIT ==================
-const userPlan = localStorage.getItem("plan") || "FREE";
+const upgradeBtn = document.getElementById("upgradeBtn");
+const currentPlanTextTop = document.getElementById("currentPlan");
+const currentPlanTextBottom = document.getElementById("currentPlanText");
+const planButtons = document.querySelectorAll(".plan-btn");
 
-const planLimits = {
-  FREE: 30,        // demo: 30 seconds
-  BRONZE: 420,     // 7 minutes
-  SILVER: 600,     // 10 minutes
+// ================== PLAN SETUP ==================
+let userPlan = localStorage.getItem("plan");
+
+if (!userPlan) {
+  userPlan = "FREE";
+  localStorage.setItem("plan", "FREE");
+}
+
+currentPlanTextTop.innerText = userPlan;
+currentPlanTextBottom.innerText = userPlan;
+
+const PLAN_LIMITS = {
+  FREE: 30,
+  BRONZE: 420,
+  SILVER: 600,
   GOLD: Infinity
 };
 
-const maxWatchTime = planLimits[userPlan];
-
-// ================== PLAY / PAUSE ==================
+// ================== VIDEO CONTROLS ==================
 playPauseBtn.addEventListener("click", () => {
   if (video.paused) {
-    // prevent replay beyond limit
-    if (userPlan !== "GOLD" && video.currentTime >= maxWatchTime) {
-      alert("Watch limit reached. Upgrade to continue watching.");
-      return;
-    }
     video.play();
     playPauseBtn.textContent = "⏸️";
   } else {
@@ -35,125 +40,124 @@ playPauseBtn.addEventListener("click", () => {
   }
 });
 
-// ================== TIME UPDATE + HARD LIMIT ==================
-video.addEventListener("timeupdate", () => {
-  // progress bar
-  const progress = (video.currentTime / video.duration) * 100;
-  progressBar.value = progress || 0;
-
-  // time text
-  const minutes = Math.floor(video.currentTime / 60);
-  const seconds = Math.floor(video.currentTime % 60)
-    .toString()
-    .padStart(2, "0");
-  timeDisplay.textContent = `${minutes}:${seconds}`;
-
-  // HARD STOP
-  if (userPlan !== "GOLD" && video.currentTime >= maxWatchTime) {
-    video.currentTime = maxWatchTime;
-    video.pause();
-    playPauseBtn.textContent = "▶️";
-    alert("Watch limit reached. Upgrade to continue watching.");
-  }
-});
-
-// ================== SEEK (BLOCK OVER LIMIT) ==================
-progressBar.addEventListener("input", () => {
-  const seekTime = (progressBar.value / 100) * video.duration;
-
-  if (userPlan !== "GOLD" && seekTime > maxWatchTime) {
-    video.currentTime = maxWatchTime;
-    video.pause();
-    alert("Watch limit reached. Upgrade to continue watching.");
-  } else {
-    video.currentTime = seekTime;
-  }
-});
-
-// ================== SKIP BUTTONS ==================
 backwardBtn.addEventListener("click", () => {
   video.currentTime = Math.max(0, video.currentTime - 10);
 });
 
 forwardBtn.addEventListener("click", () => {
-  const nextTime = video.currentTime + 10;
+  video.currentTime = Math.min(video.duration, video.currentTime + 10);
+});
 
-  if (userPlan !== "GOLD" && nextTime > maxWatchTime) {
-    video.currentTime = maxWatchTime;
+video.addEventListener("timeupdate", () => {
+  if (!video.duration) return;
+
+  progressBar.value = (video.currentTime / video.duration) * 100;
+
+  const current = Math.floor(video.currentTime);
+  const total = Math.floor(video.duration);
+  timeDisplay.textContent = `${current}s / ${total}s`;
+
+  if (video.currentTime >= PLAN_LIMITS[userPlan]) {
     video.pause();
-    alert("Watch limit reached. Upgrade to continue watching.");
-  } else {
-    video.currentTime = Math.min(video.duration, nextTime);
+    alert("Your plan limit is reached. Upgrade to continue.");
   }
 });
 
-// ================== GESTURE CONTROLS ==================
-let lastTapTime = 0;
-
-gestureArea.addEventListener("click", (e) => {
-  if (e.target.closest(".controls")) return;
-
-  const now = Date.now();
-  const diff = now - lastTapTime;
-  const width = gestureArea.offsetWidth;
-  const tapX = e.offsetX;
-
-  // DOUBLE TAP
-  if (diff < 300 && diff > 0) {
-    if (tapX < width / 2) {
-      video.currentTime = Math.max(0, video.currentTime - 10);
-    } else {
-      const nextTime = video.currentTime + 10;
-      if (userPlan !== "GOLD" && nextTime > maxWatchTime) {
-        video.currentTime = maxWatchTime;
-        video.pause();
-        alert("Watch limit reached. Upgrade to continue watching.");
-      } else {
-        video.currentTime = Math.min(video.duration, nextTime);
-      }
-    }
-  }
-  // SINGLE TAP
-  else {
-    if (video.paused) {
-      if (userPlan !== "GOLD" && video.currentTime >= maxWatchTime) {
-        alert("Watch limit reached. Upgrade to continue watching.");
-        return;
-      }
-      video.play();
-      playPauseBtn.textContent = "⏸️";
-    } else {
-      video.pause();
-      playPauseBtn.textContent = "▶️";
-    }
-  }
-
-  lastTapTime = now;
+progressBar.addEventListener("input", () => {
+  video.currentTime = (progressBar.value / 100) * video.duration;
 });
 
-// ================== PLAN UI LOGIC ==================
-const planButtons = document.querySelectorAll(".plan-btn");
-const currentPlanText = document.getElementById("currentPlanText");
+// ================== PLAN BUTTONS ==================
+upgradeBtn.addEventListener("click", () => {
+  userPlan = "GOLD";
+  localStorage.setItem("plan", "GOLD");
+  currentPlanTextTop.innerText = "GOLD";
+  currentPlanTextBottom.innerText = "GOLD";
+  alert("Upgraded to GOLD plan 🎉");
+});
 
-// Show current plan on load
-currentPlanText.textContent = userPlan;
-
-// Highlight active plan
 planButtons.forEach(btn => {
-  if (btn.dataset.plan === userPlan) {
-    btn.classList.add("active");
-  }
-
   btn.addEventListener("click", () => {
     const selectedPlan = btn.dataset.plan;
-
-    // Save plan
+    userPlan = selectedPlan;
     localStorage.setItem("plan", selectedPlan);
-
-    alert(`Plan changed to ${selectedPlan}. Page will reload.`);
-
-    // Reload to apply new limits
-    location.reload();
+    currentPlanTextTop.innerText = selectedPlan;
+    currentPlanTextBottom.innerText = selectedPlan;
+    alert(`Switched to ${selectedPlan} plan`);
   });
 });
 
+// ================== COMMENTS SYSTEM ==================
+const commentInput = document.getElementById("commentInput");
+const addCommentBtn = document.getElementById("addCommentBtn");
+const commentsList = document.getElementById("commentsList");
+
+let comments = JSON.parse(localStorage.getItem("comments")) || [];
+
+function saveComments() {
+  localStorage.setItem("comments", JSON.stringify(comments));
+}
+
+function hasSpecialChars(text) {
+  return /[^a-zA-Z0-9\s]/.test(text);
+}
+
+function renderComments() {
+  commentsList.innerHTML = "";
+
+  comments.forEach((comment, index) => {
+    const div = document.createElement("div");
+
+    div.innerHTML = `
+      <p>${comment.text}</p>
+      <button onclick="likeComment(${index})">👍 ${comment.likes}</button>
+      <button onclick="dislikeComment(${index})">👎 ${comment.dislikes}</button>
+      <hr>
+    `;
+
+    commentsList.appendChild(div);
+  });
+}
+
+addCommentBtn.addEventListener("click", () => {
+  const text = commentInput.value.trim();
+
+  if (!text) {
+    alert("Comment cannot be empty");
+    return;
+  }
+
+  if (hasSpecialChars(text)) {
+    alert("Special characters are not allowed");
+    return;
+  }
+
+  comments.push({
+    text,
+    likes: 0,
+    dislikes: 0
+  });
+
+  saveComments();
+  renderComments();
+  commentInput.value = "";
+});
+
+function likeComment(index) {
+  comments[index].likes++;
+  saveComments();
+  renderComments();
+}
+
+function dislikeComment(index) {
+  comments[index].dislikes++;
+
+  if (comments[index].dislikes >= 2) {
+    comments.splice(index, 1);
+  }
+
+  saveComments();
+  renderComments();
+}
+
+renderComments();
