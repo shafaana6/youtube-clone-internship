@@ -25,6 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const gestureArea = document.getElementById("gestureArea");
 
+  const downloadBtn = document.getElementById("downloadBtn");
+  const downloadMsg = document.getElementById("downloadMsg");
+
   /* ========= LOGIN ========= */
   let currentUser = localStorage.getItem("user");
 
@@ -85,13 +88,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updatePlanUI();
 
+  /* ========= DOWNLOAD ========= */
+  if (downloadBtn) {
+    downloadBtn.onclick = () => {
+      if (userPlan !== "GOLD") {
+        downloadMsg.textContent = "Upgrade to GOLD to download this video.";
+        downloadMsg.style.color = "#ff4d4d";
+        return;
+      }
+
+      downloadMsg.textContent = "Download started...";
+      downloadMsg.style.color = "#4CAF50";
+
+      const link = document.createElement("a");
+      link.href = video.currentSrc || "assets/sample.mp4";
+      link.download = "mytube-video.mp4";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+  }
+
   /* ========= VIDEO ========= */
   playPauseBtn.onclick = () => {
     video.paused ? video.play() : video.pause();
   };
 
-  backwardBtn.onclick = () => video.currentTime -= 10;
-  forwardBtn.onclick = () => video.currentTime += 10;
+  backwardBtn.onclick = () => {
+    video.currentTime = Math.max(0, video.currentTime - 10);
+  };
+
+  forwardBtn.onclick = () => {
+    if (!video.duration) return;
+    video.currentTime = Math.min(video.duration, video.currentTime + 10);
+  };
+
+  video.addEventListener("loadedmetadata", () => {
+    progressBar.max = video.duration;
+  });
 
   video.addEventListener("timeupdate", () => {
     if (!video.duration) return;
@@ -104,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
       controls.classList.add("disabled");
     }
 
-    progressBar.max = video.duration;
     progressBar.value = video.currentTime;
     timeDisplay.textContent =
       `${Math.floor(video.currentTime)}s / ${Math.floor(video.duration)}s`;
@@ -116,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ========= TRANSLATION DATA ========= */
   const DICTIONARIES = {
-    English: {},
     Hindi: {
       namaste: "hello",
       shukriya: "thank you",
@@ -161,6 +193,14 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderComments() {
     commentsList.innerHTML = "";
 
+    if (comments.length === 0) {
+      commentsList.innerHTML = `
+        <p style="color:#aaa;font-size:14px;">
+          No comments yet. Be the first to comment!
+        </p>`;
+      return;
+    }
+
     comments.forEach((c, i) => {
       const div = document.createElement("div");
       div.dataset.index = i;
@@ -180,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ${
           c.showTranslation
             ? `<p class="comment-text translated" style="opacity:0.7;">
-                → ${c.translated} <br>
+                → ${c.translated}<br>
                 <small>Detected: ${c.language}</small>
               </p>`
             : ""
@@ -253,8 +293,8 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ========= GESTURES ========= */
   gestureArea.onclick = e => {
     const w = gestureArea.clientWidth;
-    if (e.offsetX < w / 3) video.currentTime -= 10;
-    else if (e.offsetX > (w * 2) / 3) video.currentTime += 10;
+    if (e.offsetX < w / 3) backwardBtn.click();
+    else if (e.offsetX > (w * 2) / 3) forwardBtn.click();
     else playPauseBtn.click();
   };
 
