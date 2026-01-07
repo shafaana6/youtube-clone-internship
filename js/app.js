@@ -24,9 +24,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginStatus = document.getElementById("loginStatus");
 
   const gestureArea = document.getElementById("gestureArea");
-
   const downloadBtn = document.getElementById("downloadBtn");
   const downloadMsg = document.getElementById("downloadMsg");
+
+  /* ========= HELPERS ========= */
+  function isValidComment(text) {
+    return /^[a-zA-Z0-9\s.,!?🙂😂😍👍]+$/.test(text);
+  }
 
   /* ========= LOGIN ========= */
   let currentUser = localStorage.getItem("user");
@@ -88,143 +92,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updatePlanUI();
 
-  /* ========= DOWNLOAD ========= */
-  if (downloadBtn) {
-    downloadBtn.onclick = () => {
-      if (userPlan !== "GOLD") {
-        downloadMsg.textContent = "Upgrade to GOLD to download this video.";
-        downloadMsg.style.color = "#ff4d4d";
-        return;
-      }
-
-      downloadMsg.textContent = "Download started...";
-      downloadMsg.style.color = "#4CAF50";
-
-      const link = document.createElement("a");
-      link.href = video.currentSrc || "assets/sample.mp4";
-      link.download = "mytube-video.mp4";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    };
-  }
-
-  /* ========= VIDEO ========= */
-  playPauseBtn.onclick = () => {
-    video.paused ? video.play() : video.pause();
-  };
-
-  backwardBtn.onclick = () => {
-    video.currentTime = Math.max(0, video.currentTime - 10);
-  };
-
-  forwardBtn.onclick = () => {
-    if (!video.duration) return;
-    video.currentTime = Math.min(video.duration, video.currentTime + 10);
-  };
-
-  video.addEventListener("loadedmetadata", () => {
-    progressBar.max = video.duration;
-  });
-
-  video.addEventListener("timeupdate", () => {
-    if (!video.duration) return;
-
-    const limit = PLAN_LIMITS[userPlan];
-    if (video.currentTime >= limit) {
-      video.currentTime = limit;
-      video.pause();
-      lockMessage.style.display = "block";
-      controls.classList.add("disabled");
-    }
-
-    progressBar.value = video.currentTime;
-    timeDisplay.textContent =
-      `${Math.floor(video.currentTime)}s / ${Math.floor(video.duration)}s`;
-  });
-
-  progressBar.oninput = () => {
-    video.currentTime = Math.min(progressBar.value, PLAN_LIMITS[userPlan]);
-  };
-
-  /* ========= TRANSLATION DATA ========= */
-  const DICTIONARIES = {
-    Hindi: {
-      namaste: "hello",
-      shukriya: "thank you",
-      dhanyavaad: "thank you",
-      dost: "friend",
-      pyaar: "love"
-    },
-    Tamil: {
-      vanakkam: "hello",
-      nandri: "thank you",
-      nanri: "thank you",
-      nanban: "friend",
-      kadhal: "love",
-      epdi: "how",
-      enna: "what"
-    },
-    Other: {
-      hola: "hello",
-      bonjour: "hello",
-      amigo: "friend",
-      gracias: "thank you",
-      danke: "thank you",
-      salaam: "peace"
-    }
-  };
-
-  function detectLanguage(word) {
-    for (const lang in DICTIONARIES) {
-      if (DICTIONARIES[lang][word]) {
-        return {
-          language: lang,
-          translation: DICTIONARIES[lang][word]
-        };
-      }
-    }
-    return null;
-  }
-
   /* ========= COMMENTS ========= */
   let comments = JSON.parse(localStorage.getItem("comments")) || [];
+
+  function saveAndRender() {
+    localStorage.setItem("comments", JSON.stringify(comments));
+    renderComments();
+  }
 
   function renderComments() {
     commentsList.innerHTML = "";
 
     if (comments.length === 0) {
-      commentsList.innerHTML = `
-        <p style="color:#aaa;font-size:14px;">
-          No comments yet. Be the first to comment!
-        </p>`;
+      commentsList.innerHTML =
+        `<p style="color:#aaa;font-size:14px;">No comments yet.</p>`;
       return;
     }
 
-    comments.forEach((c, i) => {
+    comments.forEach(c => {
       const div = document.createElement("div");
-      div.dataset.index = i;
 
       div.innerHTML = `
         <p><strong>${c.user}</strong></p>
         <p class="comment-text">${c.text}</p>
 
         <div class="comment-actions">
-          <button data-action="like">👍 ${c.likes}</button>
-          <button data-action="dislike">👎 ${c.dislikes}</button>
-          <button data-action="translate">
-            ${c.showTranslation ? "❌ Hide" : "🌐 Translate"}
-          </button>
+          <button data-id="${c.id}" data-action="like">👍 ${c.likes}</button>
+          <button data-id="${c.id}" data-action="dislike">👎 ${c.dislikes}</button>
         </div>
-
-        ${
-          c.showTranslation
-            ? `<p class="comment-text translated" style="opacity:0.7;">
-                → ${c.translated}<br>
-                <small>Detected: ${c.language}</small>
-              </p>`
-            : ""
-        }
       `;
 
       commentsList.appendChild(div);
@@ -232,70 +127,50 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   commentsList.onclick = e => {
-    if (!currentUser) return;
-
     const btn = e.target.closest("button");
-    if (!btn) return;
+    if (!btn || !currentUser) return;
 
-    const card = btn.closest("div[data-index]");
-    const i = Number(card.dataset.index);
+    const id = btn.dataset.id;
     const action = btn.dataset.action;
 
-    if (action === "like") comments[i].likes++;
+    const comment = comments.find(c => c.id === id);
+    if (!comment) return;
 
-    if (action === "dislike") {
-      comments[i].dislikes++;
-      if (comments[i].dislikes >= 2) comments.splice(i, 1);
+    if (action === "like") {
+      comment.likes++;
     }
 
-    if (action === "translate") {
-      if (comments[i].translated) {
-        comments[i].showTranslation = !comments[i].showTranslation;
-      } else {
-        const key = comments[i].text.toLowerCase();
-        const result = detectLanguage(key);
-
-        comments[i].translated = result
-          ? result.translation
-          : "Translation not available";
-        comments[i].language = result
-          ? result.language
-          : "Unknown";
-        comments[i].showTranslation = true;
+    if (action === "dislike") {
+      comment.dislikes++;
+      if (comment.dislikes >= 2) {
+        comments = comments.filter(c => c.id !== id);
       }
     }
 
-    localStorage.setItem("comments", JSON.stringify(comments));
-    renderComments();
+    saveAndRender();
   };
 
   addCommentBtn.onclick = () => {
     const text = commentInput.value.trim();
     if (!text) return;
 
+    if (!isValidComment(text)) {
+      alert("Special characters are not allowed.");
+      return;
+    }
+
     comments.push({
+      id: crypto.randomUUID(), // 🔥 KEY FIX
       user: currentUser,
       text,
       likes: 0,
-      dislikes: 0,
-      translated: null,
-      language: null,
-      showTranslation: false
+      dislikes: 0
     });
 
-    localStorage.setItem("comments", JSON.stringify(comments));
-    renderComments();
+    saveAndRender();
     commentInput.value = "";
   };
 
   renderComments();
-
-  /* ========= GESTURES ========= */
-  gestureArea.onclick = e => {
-    const w = gestureArea.clientWidth;
-    if (e.offsetX < w / 3) backwardBtn.click();
-    else if (e.offsetX > (w * 2) / 3) forwardBtn.click();
-    else playPauseBtn.click();
-  };
 
 });
